@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:pooja_pro/firebase/firebase_service.dart';
 import 'package:pooja_pro/screens/temple_details.dart';
 import 'package:video_player/video_player.dart';
 import '../models/temple.dart';
@@ -24,7 +25,7 @@ class CustomerDashboard extends StatefulWidget {
 class _CustomerDashboardState extends State<CustomerDashboard> {
   int _selectedIndex = 0; // Tracks which tab is selected
   final FirebaseAuth _auth = FirebaseAuth.instance;
-
+  final firebaseService = FirebaseService();
   Widget _screens() {
     if (_selectedIndex == 0) {
       return CustomerHomeScreen(userId: widget.userId);
@@ -119,13 +120,8 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                         trailing: IconButton(
                             icon: const Icon(Icons.add),
                             onPressed: () async {
-                              if (await FirebaseFirestore.instance
-                                  .collection('customers')
-                                  .doc(widget.userId)
-                                  .collection('bookmarks')
-                                  .where('templeId', isEqualTo: temple.id)
-                                  .get()
-                                  .then((value) => value.docs.isNotEmpty)) {
+                              if (await firebaseService.checkBookmark(
+                                  temple, widget.userId)) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
                                     content: Text('Bookmark already exists!'),
@@ -133,11 +129,8 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                                 );
                                 return;
                               } else {
-                                FirebaseFirestore.instance
-                                    .collection('customers')
-                                    .doc(widget.userId)
-                                    .collection('bookmarks')
-                                    .add({'templeId': temple.id});
+                                firebaseService.addBookmark(
+                                    widget.userId, temple);
 
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(

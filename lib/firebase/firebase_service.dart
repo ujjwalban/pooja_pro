@@ -136,6 +136,24 @@ class FirebaseService {
     return bookmarkedTempleIds;
   }
 
+  Future<bool> checkBookmark(Temple temple, customerId) async {
+    return await FirebaseFirestore.instance
+        .collection('customers')
+        .doc(customerId)
+        .collection('bookmarks')
+        .where('templeId', isEqualTo: temple.id)
+        .get()
+        .then((value) => value.docs.isNotEmpty);
+  }
+
+  void addBookmark(customerId, Temple temple) async {
+    await FirebaseFirestore.instance
+        .collection('customers')
+        .doc(customerId)
+        .collection('bookmarks')
+        .add({'templeId': temple.id});
+  }
+
   Stream<List<Blog>> getLatestBlogs(List<String> templeIds) {
     return FirebaseFirestore.instance
         .collectionGroup('blogs')
