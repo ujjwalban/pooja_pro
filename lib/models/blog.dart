@@ -1,0 +1,53 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+class Blog {
+  final String blogId;
+  final String title;
+  final String description;
+  final String location;
+  final String dateTime;
+  final String imageUrl;
+
+  Blog({
+    required this.blogId,
+    required this.title,
+    required this.description,
+    required this.location,
+    required this.dateTime,
+    required this.imageUrl,
+  });
+
+  factory Blog.fromMap(Map<String, dynamic> map) {
+    return Blog(
+      blogId: map['blogId'],
+      title: map['title'],
+      description: map['description'],
+      location: map['location'],
+      dateTime: map['date_time'],
+      imageUrl: map['image_url'],
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'blogId': blogId,
+      'title': title,
+      'description': description,
+      'location': location,
+      'date_time': dateTime,
+      'image_url': imageUrl,
+    };
+  }
+
+  factory Blog.fromFirestore(DocumentSnapshot doc) {
+    Map data = doc.data() as Map<String, dynamic>;
+    return Blog(
+      blogId: data['blogId'],
+      title: data['title'],
+      description: data['description'],
+      location: data['location'],
+      imageUrl: data['image_url'],
+      dateTime: data['date_time'],
+    );
+  }
+}
