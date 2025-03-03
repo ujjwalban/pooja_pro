@@ -6,7 +6,7 @@ import '../models/service.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 
-Card service_section(String templeId, BuildContext context, String userType) {
+Card serviceSection(String templeId, BuildContext context, String userType) {
   if (userType == 'temple') {
     return Card(
       margin: const EdgeInsets.all(16.0),

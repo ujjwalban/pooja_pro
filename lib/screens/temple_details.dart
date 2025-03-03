@@ -75,8 +75,8 @@ class _TempleDetailsPageState extends State<TempleDetailsPage> {
               child: IndexedStack(
                 index: _selectedIndex,
                 children: [
-                  _buildBlogsTab(widget.templeId),
-                  _buildServicesTab(widget.templeId),
+                  _buildBlogsTab(widget.templeId, widget.templeName),
+                  _buildServicesTab(widget.templeId, widget.templeName),
                 ],
               ),
             ),
@@ -100,7 +100,7 @@ class _TempleDetailsPageState extends State<TempleDetailsPage> {
     );
   }
 
-  Widget _buildBlogsTab(String templeId) {
+  Widget _buildBlogsTab(String templeId, String templeName) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Column(
@@ -110,14 +110,14 @@ class _TempleDetailsPageState extends State<TempleDetailsPage> {
             padding: EdgeInsets.symmetric(vertical: 8.0),
           ),
           Expanded(
-            child: blogSection(templeId, context, 'customer'),
+            child: blogSection(templeId, templeName, context, 'customer'),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildServicesTab(String templeId) {
+  Widget _buildServicesTab(String templeId, String templeName) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Column(
@@ -127,7 +127,7 @@ class _TempleDetailsPageState extends State<TempleDetailsPage> {
             padding: EdgeInsets.symmetric(vertical: 8.0),
           ),
           Expanded(
-            child: service_section(templeId, context, 'customer'),
+            child: serviceSection(templeId, context, 'customer'),
           ),
         ],
       ),

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import '../models/blog.dart';
 import '../models/service.dart';
 import '../models/customer.dart';
@@ -47,6 +48,7 @@ class FirebaseService {
         .collection('blogs')
         .add(Blog(
           blogId: blogId,
+          templeName: blog.templeName,
           title: blog.title,
           description: blog.description,
           location: blog.location,
@@ -125,15 +127,13 @@ class FirebaseService {
             snapshot.docs.map((doc) => Temple.fromMap(doc.data())).toList());
   }
 
-  Future<List<String>> getBookmarkedTemples(String userId) async {
-    DocumentSnapshot userDoc = await FirebaseFirestore.instance
+  Stream<List<String>> getBookmarkedTemples(String userId) {
+    return FirebaseFirestore.instance
         .collection('customers')
         .doc(userId)
-        .get();
-
-    List<String> bookmarkedTempleIds =
-        List<String>.from(userDoc['bookmarks'] ?? []);
-    return bookmarkedTempleIds;
+        .collection('bookmarks')
+        .snapshots()
+        .map((snapshot) => snapshot.docs.map((doc) => doc.id).toList());
   }
 
   Future<bool> checkBookmark(Temple temple, customerId) async {
@@ -147,21 +147,29 @@ class FirebaseService {
   }
 
   void addBookmark(customerId, Temple temple) async {
-    await FirebaseFirestore.instance
+    FirebaseFirestore.instance
         .collection('customers')
         .doc(customerId)
         .collection('bookmarks')
-        .add({'templeId': temple.id});
+        .doc(temple.id)
+        .set({'templeId': temple.id});
   }
 
-  Stream<List<Blog>> getLatestBlogs(List<String> templeIds) {
+  Stream<List<Blog>> getLatestBlogs(List<String> documents) {
+    debugPrint(documents.first.toString());
     return FirebaseFirestore.instance
-        .collectionGroup('blogs')
-        .where('templeId', whereIn: templeIds)
-        .orderBy('date_time', descending: true)
+        .collection('temples')
+        .where(FieldPath.documentId, whereIn: documents)
         .snapshots()
-        .map((snapshot) =>
-            snapshot.docs.map((doc) => Blog.fromFirestore(doc)).toList());
+        .asyncMap((snapshot) async {
+      final List<Blog> blogs = [];
+      for (var doc in snapshot.docs) {
+        final blogsSnapshot = await doc.reference.collection('blogs').get();
+        blogs.addAll(
+            blogsSnapshot.docs.map((blogDoc) => Blog.fromFirestore(blogDoc)));
+      }
+      return blogs;
+    });
   }
 
   void templeSignUp(templeId, Temple temple) async {

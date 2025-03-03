@@ -18,9 +18,9 @@ class _TempleDashboardState extends State<TempleDashboard> {
   int _selectedIndex = 0;
   Widget _buildCurrentSection() {
     if (_selectedIndex == 0) {
-      return blogSection(widget.templeId, context, 'temple');
+      return blogSection(widget.templeId, widget.templeName, context, 'temple');
     } else {
-      return service_section(widget.templeId, context, 'temple');
+      return serviceSection(widget.templeId, context, 'temple');
     }
   }
 

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../firebase/firebase_service.dart';
 import '../models/blog.dart';
 
@@ -10,26 +9,29 @@ class CustomerHomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<String>>(
-      future: FirebaseService().getBookmarkedTemples(userId),
+    final firebaseService = FirebaseService();
+    return StreamBuilder<List<String>>(
+      stream: firebaseService.getBookmarkedTemples(userId),
       builder: (context, snapshot) {
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return Center(child: Text('$snapshot'));
+          return const Center(child: Text('No temples bookmarked'));
         }
 
         return StreamBuilder<List<Blog>>(
-          stream: FirebaseService().getLatestBlogs(snapshot.data!),
+          stream: firebaseService.getLatestBlogs(snapshot.data!),
           builder: (context, blogSnapshot) {
             if (!blogSnapshot.hasData) {
               return const Center(child: CircularProgressIndicator());
             }
 
             List<Blog> blogs = blogSnapshot.data!;
+            debugPrint('Blogs: ${blogs.length}');
 
             return ListView.builder(
               itemCount: blogs.length,
               itemBuilder: (context, index) {
                 Blog blog = blogs[index];
+                debugPrint('Blog: ${blog.title}');
                 return BlogCard(blog: blog);
               },
             );
@@ -55,6 +57,12 @@ class BlogCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text(blog.templeName,
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 5),
+            Image.network(blog.imageUrl, width: 200, height: 200),
+            const SizedBox(height: 5),
             Text(blog.title,
                 style:
                     const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
@@ -62,7 +70,7 @@ class BlogCard extends StatelessWidget {
             Text(blog.description,
                 maxLines: 2, overflow: TextOverflow.ellipsis),
             const SizedBox(height: 10),
-            Text('Published on: ${blog.dateTime}',
+            Text(blog.dateTime,
                 style: const TextStyle(fontSize: 12, color: Colors.grey)),
           ],
         ),

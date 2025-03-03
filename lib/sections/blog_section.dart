@@ -7,7 +7,8 @@ import '../models/blog.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 
-Card blogSection(String templeId, BuildContext context, String userType) {
+Card blogSection(
+    String templeId, String templeName, BuildContext context, String userType) {
   if (userType == 'temple') {
     return Card(
       margin: const EdgeInsets.all(16.0),
@@ -32,7 +33,7 @@ Card blogSection(String templeId, BuildContext context, String userType) {
                     icon: const Icon(Icons.add, color: Colors.green),
                     onPressed: () async {
                       _showBlogDialogForAddingBlog(
-                          context, templeId, null, null);
+                          context, templeId, templeName, null, null);
                     },
                   ),
                 ],
@@ -148,6 +149,7 @@ Card blogSection(String templeId, BuildContext context, String userType) {
                                   _showBlogDialogForAddingBlog(
                                     context,
                                     templeId,
+                                    templeName,
                                     blog,
                                     stream.data![index].blogId,
                                   );
@@ -402,6 +404,7 @@ void _showBlogDetailsBottomSheet(BuildContext context, Blog blog) {
 void _showBlogDialogForAddingBlog(
   BuildContext context,
   String templeId,
+  String templeName,
   Blog? blog,
   String? docId,
 ) {
@@ -503,6 +506,7 @@ void _showBlogDialogForAddingBlog(
                       templeId,
                       Blog(
                           blogId: "",
+                          templeName: templeName,
                           title: titleController.text,
                           description: descriptionController.text,
                           location: locationController.text,
@@ -513,6 +517,7 @@ void _showBlogDialogForAddingBlog(
                     templeId,
                     Blog(
                       blogId: blog.blogId,
+                      templeName: templeName,
                       title: titleController.text,
                       description: descriptionController.text,
                       location: locationController.text,
