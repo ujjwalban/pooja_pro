@@ -49,8 +49,8 @@ class _TempleProfileState extends State<TempleProfile> {
                           const SizedBox(height: 25, width: 500),
                           Image.network(
                             templeData.image,
-                            width: 200,
-                            height: 250,
+                            width: 400,
+                            height: 400,
                           ),
                           const SizedBox(height: 25, width: 500),
                           Text(templeData.description,
