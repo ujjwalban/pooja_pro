@@ -27,11 +27,11 @@ class Temple {
 
   factory Temple.fromMap(Map<String, dynamic> map) {
     return Temple(
-      id: map['id'],
-      name: map['name'],
-      location: map['location'],
-      description: map['description'],
-      image: map['image'],
+      id: map['id'] ?? "",
+      name: map['name'] ?? "",
+      location: map['location'] ?? "",
+      description: map['description'] ?? "",
+      image: map['image'] ?? "",
     );
   }
 

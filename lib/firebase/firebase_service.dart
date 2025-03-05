@@ -34,6 +34,13 @@ class FirebaseService {
             .toMap());
   }
 
+  void updateTempleProfile(Temple templeProfile) {
+    _firestore
+        .collection('temples')
+        .doc(templeProfile.id)
+        .update(templeProfile.toMap());
+  }
+
   Future<void> addTempleBlog(String templeId, Blog blog) async {
     User? temple = _auth.currentUser;
     String blogId = const Uuid().v1();
@@ -115,16 +122,25 @@ class FirebaseService {
             snapshot.docs.map((doc) => Blog.fromFirestore(doc)).toList());
   }
 
-  Stream<List<Customer>> customerData() {
-    return FirebaseFirestore.instance.collection('customers').snapshots().map(
-        (snapshot) =>
-            snapshot.docs.map((doc) => Customer.fromMap(doc.data())).toList());
+  Future<DocumentSnapshot<Map<String, dynamic>>> customerData(
+      String customerId) {
+    return FirebaseFirestore.instance
+        .collection('customers')
+        .doc(customerId)
+        .get();
   }
 
-  Stream<List<Temple>> templeData() {
-    return FirebaseFirestore.instance.collection('temples').snapshots().map(
-        (snapshot) =>
-            snapshot.docs.map((doc) => Temple.fromMap(doc.data())).toList());
+  Future<DocumentSnapshot<Map<String, dynamic>>> templeData(String templeId) {
+    return FirebaseFirestore.instance.collection('temples').doc(templeId).get();
+  }
+
+  Future<Temple> templeProfile(String templeId) async {
+    final docRef =
+        FirebaseFirestore.instance.collection("temples").doc(templeId);
+    debugPrint(templeId);
+    debugPrint(docRef.toString());
+    final doc = await docRef.get();
+    return Temple.fromMap(doc.data() as Map<String, dynamic>);
   }
 
   Stream<List<String>> getBookmarkedTemples(String userId) {

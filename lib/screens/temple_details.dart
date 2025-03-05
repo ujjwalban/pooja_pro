@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:pooja_pro/screens/temple_profile.dart';
 import 'package:pooja_pro/sections/blog_section.dart';
 import 'package:pooja_pro/sections/service_section.dart';
 
+// This code is used in customer dashboard to  display the temples information
 class TempleDetailsPage extends StatefulWidget {
   final String templeId;
   final String templeName;
@@ -60,16 +62,6 @@ class _TempleDetailsPageState extends State<TempleDetailsPage> {
                 ),
               ),
             ),
-            Card(
-              margin:
-                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-              child: ListTile(
-                title: Text(
-                  widget.templeDescription,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
             // Content Area
             Expanded(
               child: IndexedStack(
@@ -77,6 +69,7 @@ class _TempleDetailsPageState extends State<TempleDetailsPage> {
                 children: [
                   _buildBlogsTab(widget.templeId, widget.templeName),
                   _buildServicesTab(widget.templeId, widget.templeName),
+                  _buildProfileTab(widget.templeId)
                 ],
               ),
             ),
@@ -92,8 +85,12 @@ class _TempleDetailsPageState extends State<TempleDetailsPage> {
             label: "Blogs",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.room_service),
+            icon: Icon(Icons.handshake),
             label: "Services",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.photo),
+            label: "Profile",
           ),
         ],
       ),
@@ -128,6 +125,23 @@ class _TempleDetailsPageState extends State<TempleDetailsPage> {
           ),
           Expanded(
             child: serviceSection(templeId, context, 'customer'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProfileTab(String templeId) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 8.0),
+          ),
+          Expanded(
+            child: TempleProfile(userType: 'customer', templeId: templeId),
           ),
         ],
       ),

@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pooja_pro/firebase/firebase_service.dart';
@@ -27,19 +28,18 @@ class AuthService {
 
       if (userType == "Temple") {
         try {
-          String templeId = user.uid;
-
           // Navigate to Temple Dashboard, passing the Temple ID
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => StreamBuilder<List<Temple>>(
-                stream: FirebaseService().templeData(),
+              builder: (context) =>
+                  FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+                future: FirebaseService().templeData(user.uid),
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
+                    var data = snapshot.data!.data()!;
                     return TempleDashboard(
-                      templeId: templeId,
-                      templeName: snapshot.data!.first.name,
+                      templeDetails: Temple.fromMap(data),
                     );
                   } else if (snapshot.hasError) {
                     return Scaffold(
@@ -69,13 +69,14 @@ class AuthService {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => StreamBuilder<List<Customer>>(
-                stream: FirebaseService().customerData(),
+              builder: (context) =>
+                  FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+                future: FirebaseService().customerData(customerId),
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     return CustomerDashboard(
                       userId: customerId,
-                      customerName: snapshot.data!.first.fullName,
+                      customerName: snapshot.data!.get('name'),
                     );
                   } else if (snapshot.hasError) {
                     return Scaffold(
@@ -121,21 +122,19 @@ class AuthService {
       }
       if (userType == "Temple" && temple != null) {
         String templeId = user.uid;
-        FirebaseService().templeSignUp(
-            templeId,
-            Temple(
-                id: templeId,
-                name: temple.name,
-                location: temple.location,
-                description: temple.description,
-                image: temple.image));
+        Temple templeDetails = Temple(
+            id: templeId,
+            name: temple.name,
+            location: temple.location,
+            description: temple.description,
+            image: temple.image);
+        FirebaseService().templeSignUp(templeId, templeDetails);
 
         // Navigate to Temple Dashboard, passing the Temple ID
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) =>
-                TempleDashboard(templeId: templeId, templeName: temple.name),
+            builder: (context) => TempleDashboard(templeDetails: templeDetails),
           ),
         );
       } else if (customer != null) {
