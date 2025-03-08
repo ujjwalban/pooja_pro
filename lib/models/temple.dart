@@ -6,6 +6,7 @@ class Temple {
   final String location;
   final String description;
   final String image;
+  final String contact;
 
   Temple({
     required this.id,
@@ -13,6 +14,7 @@ class Temple {
     required this.location,
     required this.description,
     required this.image,
+    required this.contact,
   });
 
   Map<String, dynamic> toMap() {
@@ -22,6 +24,7 @@ class Temple {
       'location': location,
       'description': description,
       'image': image,
+      'contact': contact,
     };
   }
 
@@ -32,6 +35,7 @@ class Temple {
       location: map['location'] ?? "",
       description: map['description'] ?? "",
       image: map['image'] ?? "",
+      contact: map['contact'] ?? "",
     );
   }
 
@@ -44,6 +48,7 @@ class Temple {
       description: data['description'],
       location: data['location'],
       image: data['image'],
+      contact: data['contact'],
     );
   }
 }

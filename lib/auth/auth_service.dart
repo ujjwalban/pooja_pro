@@ -75,8 +75,12 @@ class AuthService {
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     return CustomerDashboard(
-                      userId: customerId,
-                      customerName: snapshot.data!.get('name'),
+                      customer: Customer(
+                          id: customerId,
+                          name: snapshot.data!.data()!['name'],
+                          phoneNumber: snapshot.data!.data()!['phone_number'],
+                          email: snapshot.data!.data()!['email'],
+                          photo: snapshot.data!.data()!['photo']),
                     );
                   } else if (snapshot.hasError) {
                     return Scaffold(
@@ -123,11 +127,13 @@ class AuthService {
       if (userType == "Temple" && temple != null) {
         String templeId = user.uid;
         Temple templeDetails = Temple(
-            id: templeId,
-            name: temple.name,
-            location: temple.location,
-            description: temple.description,
-            image: temple.image);
+          id: templeId,
+          name: temple.name,
+          location: temple.location,
+          description: temple.description,
+          image: temple.image,
+          contact: temple.contact,
+        );
         FirebaseService().templeSignUp(templeId, templeDetails);
 
         // Navigate to Temple Dashboard, passing the Temple ID
@@ -144,15 +150,22 @@ class AuthService {
             customerId,
             Customer(
                 id: customerId,
-                fullName: customer.fullName,
+                name: customer.name,
                 phoneNumber: customer.phoneNumber,
-                email: customer.email));
+                email: customer.email,
+                photo: customer.photo));
 
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (context) => CustomerDashboard(
-                userId: customerId, customerName: customer.fullName),
+              customer: Customer(
+                  id: customerId,
+                  name: customer.name,
+                  phoneNumber: customer.phoneNumber,
+                  email: customer.email,
+                  photo: customer.photo),
+            ),
           ),
         );
       }

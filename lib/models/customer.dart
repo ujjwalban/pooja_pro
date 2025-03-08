@@ -1,31 +1,34 @@
 class Customer {
   final String id;
-  final String fullName;
+  final String name;
   final String phoneNumber;
   final String email;
+  final String photo;
 
-  Customer({
-    required this.id,
-    required this.fullName,
-    required this.phoneNumber,
-    required this.email,
-  });
+  Customer(
+      {required this.id,
+      required this.name,
+      required this.phoneNumber,
+      required this.email,
+      required this.photo});
 
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'name': fullName,
+      'name': name,
       'phone_number': phoneNumber,
       'email': email,
+      'photo': photo,
     };
   }
 
   factory Customer.fromMap(Map<String, dynamic> map) {
     return Customer(
       id: map['id'],
-      fullName: map['name'],
+      name: map['name'],
       phoneNumber: map['phone_number'],
       email: map['email'],
+      photo: map['photo'],
     );
   }
 }

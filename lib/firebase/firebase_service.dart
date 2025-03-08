@@ -41,6 +41,13 @@ class FirebaseService {
         .update(templeProfile.toMap());
   }
 
+  void updateCustomerProfile(Customer customer) {
+    _firestore
+        .collection('customers')
+        .doc(customer.id)
+        .update(customer.toMap());
+  }
+
   Future<void> addTempleBlog(String templeId, Blog blog) async {
     User? temple = _auth.currentUser;
     String blogId = const Uuid().v1();
@@ -137,8 +144,6 @@ class FirebaseService {
   Future<Temple> templeProfile(String templeId) async {
     final docRef =
         FirebaseFirestore.instance.collection("temples").doc(templeId);
-    debugPrint(templeId);
-    debugPrint(docRef.toString());
     final doc = await docRef.get();
     return Temple.fromMap(doc.data() as Map<String, dynamic>);
   }
@@ -194,14 +199,17 @@ class FirebaseService {
         .doc(templeId)
         .set({'timestamp': FieldValue.serverTimestamp()});
 
-    await FirebaseFirestore.instance.collection('temples').doc(templeId).set(
-        Temple(
-                id: templeId,
-                name: temple.name,
-                location: temple.location,
-                description: temple.description,
-                image: temple.image)
-            .toMap());
+    await FirebaseFirestore.instance
+        .collection('temples')
+        .doc(templeId)
+        .set(Temple(
+          id: templeId,
+          name: temple.name,
+          location: temple.location,
+          description: temple.description,
+          image: temple.image,
+          contact: "",
+        ).toMap());
   }
 
   void customerSignUp(customerId, Customer customer) async {
@@ -214,9 +222,10 @@ class FirebaseService {
         .doc(customerId)
         .set(Customer(
                 id: customerId,
-                fullName: customer.fullName,
+                name: customer.name,
                 phoneNumber: customer.phoneNumber,
-                email: customer.email)
+                email: customer.email,
+                photo: customer.photo)
             .toMap());
   }
 

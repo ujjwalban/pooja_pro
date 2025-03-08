@@ -4,17 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:pooja_pro/firebase/firebase_service.dart';
 import 'package:pooja_pro/screens/temple_details.dart';
 import 'package:video_player/video_player.dart';
+import '../models/customer.dart';
 import '../models/temple.dart';
+import '../screens/customer_profile_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/customer_home_screen.dart';
 
 /// CustomerDashboard allows users to browse temple blogs and opt for services.
 /// It follows **Single Responsibility Principle (SRP)** by focusing on user navigation.
 class CustomerDashboard extends StatefulWidget {
-  final String userId;
-  final String customerName;
-  const CustomerDashboard(
-      {super.key, required this.userId, required this.customerName});
+  final Customer customer;
+  const CustomerDashboard({super.key, required this.customer});
 
   @override
   State<CustomerDashboard> createState() => _CustomerDashboardState();
@@ -28,7 +28,9 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
   final firebaseService = FirebaseService();
   Widget _screens() {
     if (_selectedIndex == 0) {
-      return CustomerHomeScreen(userId: widget.userId);
+      return CustomerHomeScreen(userId: widget.customer.id);
+    } else if (_selectedIndex == 2) {
+      return CustomerProfileScreen(customer: widget.customer);
     } else {
       return Card(
         margin: const EdgeInsets.all(16.0),
@@ -121,7 +123,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                             icon: const Icon(Icons.add),
                             onPressed: () async {
                               if (await firebaseService.checkBookmark(
-                                  temple, widget.userId)) {
+                                  temple, widget.customer.id)) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
                                     content: Text('Bookmark already exists!'),
@@ -130,7 +132,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                                 return;
                               } else {
                                 firebaseService.addBookmark(
-                                    widget.userId, temple);
+                                    widget.customer.id, temple);
 
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
@@ -144,12 +146,12 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) => TempleDetailsPage(
-                                  templeId: temple.id,
-                                  templeName: temple.name,
-                                  templeImage: temple.image,
-                                  templeDescription: temple.description,
-                                  templeLocation: temple.location,
-                                ),
+                                    templeId: temple.id,
+                                    templeName: temple.name,
+                                    templeImage: temple.image,
+                                    templeDescription: temple.description,
+                                    templeLocation: temple.location,
+                                    templeContact: temple.contact),
                               ));
                         },
                       );
@@ -198,7 +200,7 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Welcome ${widget.customerName}'),
+        title: Text('Welcome ${widget.customer.name}'),
         centerTitle: true,
         actions: [
           IconButton(
@@ -221,6 +223,10 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
           BottomNavigationBarItem(
             icon: Icon(Icons.shop),
             label: 'All Temples',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profile',
           ),
         ],
       ),

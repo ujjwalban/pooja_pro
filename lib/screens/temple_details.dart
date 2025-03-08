@@ -10,15 +10,17 @@ class TempleDetailsPage extends StatefulWidget {
   final String templeImage;
   final String templeDescription;
   final String templeLocation;
+  final String templeContact;
 
-  const TempleDetailsPage({
-    Key? key,
-    required this.templeId,
-    required this.templeName,
-    required this.templeImage,
-    required this.templeDescription,
-    required this.templeLocation,
-  }) : super(key: key);
+  const TempleDetailsPage(
+      {Key? key,
+      required this.templeId,
+      required this.templeName,
+      required this.templeImage,
+      required this.templeDescription,
+      required this.templeLocation,
+      required this.templeContact})
+      : super(key: key);
 
   @override
   _TempleDetailsPageState createState() => _TempleDetailsPageState();

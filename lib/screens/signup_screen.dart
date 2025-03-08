@@ -207,6 +207,7 @@ class _SignupScreenState extends State<SignupScreen> {
                             description:
                                 templeDescriptionController.text.trim(),
                             image: templeImageController.text.trim(),
+                            contact: "",
                           ),
                           null,
                           context),
@@ -385,9 +386,10 @@ class _SignupScreenState extends State<SignupScreen> {
                           null,
                           Customer(
                             id: '',
-                            fullName: nameController.text.trim(),
+                            name: nameController.text.trim(),
                             email: emailController.text.trim(),
                             phoneNumber: phoneController.text.trim(),
+                            photo: "",
                           ),
                           context),
                       style: ElevatedButton.styleFrom(
