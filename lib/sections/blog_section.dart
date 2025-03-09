@@ -7,6 +7,8 @@ import '../models/blog.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 
+FirebaseService firebaseService = FirebaseService();
+
 Card blogSection(
     String templeId, String templeName, BuildContext context, String userType) {
   if (userType == 'temple') {
@@ -238,7 +240,7 @@ Card blogSection(
                   }
                   {
                     return ListView.separated(
-                      padding: const EdgeInsets.all(12.0),
+                      padding: const EdgeInsets.all(20.0),
                       itemCount: stream.data!.docs.length,
                       separatorBuilder: (context, index) => Divider(
                         color: Colors.grey[300],
@@ -248,9 +250,9 @@ Card blogSection(
                         final blog =
                             Blog.fromFirestore(stream.data!.docs[index]);
                         return ListTile(
-                          visualDensity: VisualDensity.comfortable,
-                          contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 8),
+                          visualDensity: VisualDensity.standard,
+                          minTileHeight: 100,
+
                           // Extract the Blog object from the snapshot
                           // (Assuming 'stream' is your AsyncSnapshot from the StreamBuilder)
                           leading: () {
@@ -302,6 +304,7 @@ Card blogSection(
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
+                          trailing: _BlogLikes(blog: blog, templeId: templeId),
                           onTap: () {
                             // When the ListTile is tapped, create the Blog object and display the details
                             _showBlogDetailsBottomSheet(context, blog);
@@ -317,6 +320,43 @@ Card blogSection(
         ),
       ),
     );
+  }
+}
+
+class _BlogLikes extends StatefulWidget {
+  final Blog blog;
+  final String templeId;
+
+  const _BlogLikes({required this.blog, required this.templeId});
+
+  @override
+  State<_BlogLikes> createState() => _BlogLikesState();
+}
+
+class _BlogLikesState extends State<_BlogLikes> {
+  late int likes;
+
+  @override
+  void initState() {
+    super.initState();
+    likes = widget.blog.like;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Widget icon = const Icon(Icons.thumb_up_alt_outlined);
+    return Column(children: [
+      Text(likes.toString()),
+      IconButton(
+          onPressed: () {
+            firebaseService.updateBlogLike(widget.blog.blogId, widget.templeId);
+            setState(() {
+              likes += 1;
+              icon = const Icon(Icons.thumb_up);
+            });
+          },
+          icon: icon),
+    ]);
   }
 }
 
@@ -511,7 +551,8 @@ void _showBlogDialogForAddingBlog(
                           description: descriptionController.text,
                           location: locationController.text,
                           imageUrl: mediaUrlController.text,
-                          dateTime: date));
+                          dateTime: date,
+                          like: 0));
                 } else {
                   FirebaseService().updateTempleBlog(
                     templeId,
@@ -523,6 +564,7 @@ void _showBlogDialogForAddingBlog(
                       location: locationController.text,
                       imageUrl: mediaUrlController.text,
                       dateTime: date,
+                      like: blog.like,
                     ),
                     docId,
                   );

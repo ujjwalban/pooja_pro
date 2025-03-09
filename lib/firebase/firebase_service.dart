@@ -61,14 +61,15 @@ class FirebaseService {
         .doc(templeId)
         .collection('blogs')
         .add(Blog(
-          blogId: blogId,
-          templeName: blog.templeName,
-          title: blog.title,
-          description: blog.description,
-          location: blog.location,
-          dateTime: blog.dateTime,
-          imageUrl: blog.imageUrl,
-        ).toMap());
+                blogId: blogId,
+                templeName: blog.templeName,
+                title: blog.title,
+                description: blog.description,
+                location: blog.location,
+                dateTime: blog.dateTime,
+                imageUrl: blog.imageUrl,
+                like: 0)
+            .toMap());
   }
 
   Future<List<Service>> deleteTempleService(
@@ -227,6 +228,15 @@ class FirebaseService {
                 email: customer.email,
                 photo: customer.photo)
             .toMap());
+  }
+
+  void updateBlogLike(String blogId, String templeId) {
+    _firestore
+        .collection('temples')
+        .doc(templeId)
+        .collection('blogs')
+        .doc(blogId)
+        .update({'like': FieldValue.increment(1)});
   }
 
   // Sign out

@@ -8,6 +8,7 @@ class Blog {
   final String location;
   final String dateTime;
   final String imageUrl;
+  final int like;
 
   Blog({
     required this.blogId,
@@ -17,6 +18,7 @@ class Blog {
     required this.location,
     required this.dateTime,
     required this.imageUrl,
+    required this.like,
   });
 
   factory Blog.fromMap(Map<String, dynamic> map) {
@@ -28,6 +30,7 @@ class Blog {
       location: map['location'],
       dateTime: map['date_time'],
       imageUrl: map['image_url'],
+      like: map['like'],
     );
   }
 
@@ -40,6 +43,7 @@ class Blog {
       'location': location,
       'date_time': dateTime,
       'image_url': imageUrl,
+      'like': like,
     };
   }
 
@@ -53,6 +57,7 @@ class Blog {
       location: data['location'],
       imageUrl: data['image_url'],
       dateTime: data['date_time'],
+      like: data['like'],
     );
   }
 }
