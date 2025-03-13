@@ -6,8 +6,10 @@ class Service {
   final String description;
   final String location;
   final String dateTime;
-  final String imageUrl; // Nullable field for image
+  final List<String>
+      mediaUrls; // Changed from single imageUrl to list of media URLs
   final String price; // Nullable field for date
+  final int like; // Added like field
 
   Service({
     required this.serviceId,
@@ -15,8 +17,9 @@ class Service {
     required this.description,
     required this.location,
     required this.price,
-    required this.imageUrl,
+    required this.mediaUrls, // Updated parameter
     required this.dateTime,
+    this.like = 0, // Default to 0 likes
   });
 
   // Factory method to create Service from JSON
@@ -26,9 +29,11 @@ class Service {
       title: json['title'],
       description: json['description'],
       location: json['location'],
-      price: json['price'].toDouble(),
-      imageUrl: json['image_url'],
+      price: json['price'],
+      mediaUrls:
+          List<String>.from(json['media_urls'] ?? []), // Updated to parse list
       dateTime: json['date_time'],
+      like: json['like'] ?? 0, // Added like field
     );
   }
 
@@ -39,8 +44,9 @@ class Service {
       'title': title,
       'location': location,
       'price': price,
-      'image_url': imageUrl,
+      'media_urls': mediaUrls, // Updated field name
       'date_time': dateTime,
+      'like': like, // Added like field
     };
   }
 
@@ -50,9 +56,11 @@ class Service {
       title: map['title'],
       description: map['description'],
       location: map['location'],
-      price: map['price'].toDouble(),
-      imageUrl: map['image_url'],
+      price: map['price'],
+      mediaUrls:
+          List<String>.from(map['media_urls'] ?? []), // Updated to parse list
       dateTime: map['date_time'],
+      like: map['like'] ?? 0, // Added like field
     );
   }
 
@@ -63,21 +71,33 @@ class Service {
       'description': description,
       'location': location,
       'price': price,
-      'image_url': imageUrl,
+      'media_urls': mediaUrls, // Updated field name
       'date_time': dateTime,
+      'like': like, // Added like field
     };
   }
 
   factory Service.fromFirestore(DocumentSnapshot doc) {
     Map data = doc.data() as Map<String, dynamic>;
+
+    // Handle backward compatibility - if there's an image_url, add it to mediaUrls
+    List<String> urls = [];
+    if (data['media_urls'] != null) {
+      urls = List<String>.from(data['media_urls']);
+    } else if (data['image_url'] != null && data['image_url'].isNotEmpty) {
+      // If we only have the old image_url field, convert it to a list
+      urls = [data['image_url']];
+    }
+
     return Service(
-      serviceId: data['service_id'],
+      serviceId: data['service_id'] ?? '',
       title: data['title'] ?? '',
       description: data['description'] ?? '',
       location: data['location'] ?? '',
-      imageUrl: data['image_url'] ?? '',
-      dateTime: data['date_time'],
-      price: data['price'].toDouble(),
+      mediaUrls: urls,
+      dateTime: data['date_time'] ?? '',
+      price: data['price']?.toString() ?? '0',
+      like: data['like'] ?? 0, // Added like field
     );
   }
 }

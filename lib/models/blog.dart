@@ -7,7 +7,7 @@ class Blog {
   final String description;
   final String location;
   final String dateTime;
-  final String imageUrl;
+  final List<String> mediaUrls;
   final int like;
 
   Blog({
@@ -17,11 +17,20 @@ class Blog {
     required this.description,
     required this.location,
     required this.dateTime,
-    required this.imageUrl,
+    required this.mediaUrls,
     required this.like,
   });
 
+  String get imageUrl => mediaUrls.isNotEmpty ? mediaUrls.first : '';
+
   factory Blog.fromMap(Map<String, dynamic> map) {
+    List<String> media = [];
+    if (map['media_urls'] != null) {
+      media = List<String>.from(map['media_urls']);
+    } else if (map['image_url'] != null && map['image_url'].isNotEmpty) {
+      media = [map['image_url']];
+    }
+
     return Blog(
       blogId: map['blog_id'],
       templeName: map['temple_name'],
@@ -29,7 +38,7 @@ class Blog {
       description: map['description'],
       location: map['location'],
       dateTime: map['date_time'],
-      imageUrl: map['image_url'],
+      mediaUrls: media,
       like: map['like'],
     );
   }
@@ -42,20 +51,29 @@ class Blog {
       'description': description,
       'location': location,
       'date_time': dateTime,
-      'image_url': imageUrl,
+      'media_urls': mediaUrls,
+      'image_url': mediaUrls.isNotEmpty ? mediaUrls.first : '',
       'like': like,
     };
   }
 
   factory Blog.fromFirestore(DocumentSnapshot doc) {
     Map data = doc.data() as Map<String, dynamic>;
+
+    List<String> media = [];
+    if (data['media_urls'] != null) {
+      media = List<String>.from(data['media_urls']);
+    } else if (data['image_url'] != null && data['image_url'].isNotEmpty) {
+      media = [data['image_url']];
+    }
+
     return Blog(
       blogId: data['blog_id'],
       templeName: data['temple_name'],
       title: data['title'],
       description: data['description'],
       location: data['location'],
-      imageUrl: data['image_url'],
+      mediaUrls: media,
       dateTime: data['date_time'],
       like: data['like'],
     );

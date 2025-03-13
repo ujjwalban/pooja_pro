@@ -63,13 +63,6 @@ class _TempleDashboardState extends State<TempleDashboard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.templeDetails.name),
-        backgroundColor: Colors.orange,
-        actions: [
-          IconButton(icon: const Icon(Icons.logout), onPressed: _logout),
-        ],
-      ),
       body: _buildCurrentSection(),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,

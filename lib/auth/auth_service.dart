@@ -130,8 +130,12 @@ class AuthService {
           id: templeId,
           name: temple.name,
           location: temple.location,
+          latitude: temple.latitude,
+          longitude: temple.longitude,
           description: temple.description,
           image: temple.image,
+          images: temple.images,
+          videos: temple.videos,
           contact: temple.contact,
         );
         FirebaseService().templeSignUp(templeId, templeDetails);
@@ -143,28 +147,23 @@ class AuthService {
             builder: (context) => TempleDashboard(templeDetails: templeDetails),
           ),
         );
-      } else if (customer != null) {
+      } else if (userType == "Customer" && customer != null) {
         // Generate a user ID and update the user's displayName
         String customerId = user.uid;
-        FirebaseService().customerSignUp(
-            customerId,
-            Customer(
-                id: customerId,
-                name: customer.name,
-                phoneNumber: customer.phoneNumber,
-                email: customer.email,
-                photo: customer.photo));
+        Customer customerDetails = Customer(
+            id: customerId,
+            name: customer.name,
+            phoneNumber: customer.phoneNumber,
+            email: customer.email,
+            photo: customer.photo);
+
+        FirebaseService().customerSignUp(customerId, customerDetails);
 
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (context) => CustomerDashboard(
-              customer: Customer(
-                  id: customerId,
-                  name: customer.name,
-                  phoneNumber: customer.phoneNumber,
-                  email: customer.email,
-                  photo: customer.photo),
+              customer: customerDetails,
             ),
           ),
         );

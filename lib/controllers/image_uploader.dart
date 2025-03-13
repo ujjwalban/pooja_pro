@@ -1,27 +1,34 @@
 import 'package:flutter/material.dart';
-import 'package:video_player/video_player.dart';
 import '../firebase/firebase_image.dart';
+import '../components/media_thumbnail.dart';
 
 String url =
     "https://as2.ftcdn.net/v2/jpg/10/57/88/03/1000_F_1057880355_SkadoritQwzkQZ24imNZAKCtIitSUgMq.jpg";
 Widget mediaPreview(mediaUrlController) {
   // If nothing is selected, show the default mandir icon.
   if (mediaUrlController.text.isEmpty) {
-    return Image.network(
-      url,
+    return MediaThumbnail(
+      url: url,
       height: 150,
       width: 150,
-      fit: BoxFit.cover,
     );
   } else if (mediaUrlController.text.endsWith('.mp4')) {
-    return VideoPlayer(
-        VideoPlayerController.networkUrl(Uri.parse(mediaUrlController.text)));
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Container(
+          height: 150,
+          width: 150,
+          color: Colors.black,
+        ),
+        const Icon(Icons.play_circle_fill, color: Colors.white, size: 50),
+      ],
+    );
   } else {
-    return Image.network(
-      mediaUrlController.text,
+    return MediaThumbnail(
+      url: mediaUrlController.text,
       height: 150,
       width: 150,
-      fit: BoxFit.cover,
     );
   }
 }
@@ -56,12 +63,14 @@ class _ImageUploaderState extends State<ImageUploader> {
                   });
                   String? base64String =
                       await uploader.pickAndUploadMedia(isImage: true);
-                  setState(() {
-                    isUploading = false;
-                    if (base64String != null && base64String.isNotEmpty) {
-                      mediaUrlController.text = base64String;
-                    }
-                  });
+                  if (mounted) {
+                    setState(() {
+                      isUploading = false;
+                      if (base64String != null && base64String.isNotEmpty) {
+                        mediaUrlController.text = base64String;
+                      }
+                    });
+                  }
                 },
               ),
               ListTile(
@@ -74,12 +83,14 @@ class _ImageUploaderState extends State<ImageUploader> {
                   });
                   String? url =
                       await uploader.pickAndUploadMedia(isImage: false);
-                  setState(() {
-                    isUploading = false;
-                    if (url != null && url.isNotEmpty) {
-                      mediaUrlController.text = url;
-                    }
-                  });
+                  if (mounted) {
+                    setState(() {
+                      isUploading = false;
+                      if (url != null && url.isNotEmpty) {
+                        mediaUrlController.text = url;
+                      }
+                    });
+                  }
                 },
               ),
             ],

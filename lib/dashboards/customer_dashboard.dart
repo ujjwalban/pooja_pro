@@ -201,7 +201,17 @@ class _CustomerDashboardState extends State<CustomerDashboard> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Welcome ${widget.customer.name}'),
-        centerTitle: true,
+        centerTitle: false,
+        leading: _selectedIndex != 0
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () {
+                  setState(() => _selectedIndex = 0);
+                },
+                alignment: Alignment.centerLeft,
+                padding: const EdgeInsets.only(left: 16.0),
+              )
+            : null,
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),

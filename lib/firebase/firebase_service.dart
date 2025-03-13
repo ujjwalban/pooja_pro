@@ -6,12 +6,13 @@ import '../models/service.dart';
 import '../models/customer.dart';
 import '../models/temple.dart';
 import 'package:uuid/uuid.dart';
+import 'dart:math' as math;
 
 class FirebaseService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  Future<void> addTempleService(String templeId, Service service) async {
+  Future<String> addTempleService(String templeId, Service service) async {
     String serviceId = const Uuid().v1();
     User? temple = _auth.currentUser;
 
@@ -19,19 +20,27 @@ class FirebaseService {
       throw Exception("User not authenticated");
     }
 
-    await _firestore
+    // Create a new document reference
+    DocumentReference docRef = _firestore
         .collection('temples')
         .doc(templeId)
         .collection('services')
-        .add(Service(
-                dateTime: service.dateTime,
-                description: service.description,
-                imageUrl: service.imageUrl,
-                location: service.location,
-                price: service.price,
-                serviceId: serviceId,
-                title: service.title)
-            .toMap());
+        .doc();
+
+    // Create the service with the Firestore document ID
+    Service newService = Service(
+        dateTime: service.dateTime,
+        description: service.description,
+        mediaUrls: service.mediaUrls,
+        location: service.location,
+        price: service.price,
+        serviceId: docRef.id, // Use Firestore document ID as service ID
+        title: service.title);
+
+    // Set the document data
+    await docRef.set(newService.toMap());
+
+    return docRef.id; // Return the document ID
   }
 
   void updateTempleProfile(Temple templeProfile) {
@@ -48,28 +57,35 @@ class FirebaseService {
         .update(customer.toMap());
   }
 
-  Future<void> addTempleBlog(String templeId, Blog blog) async {
+  Future<String> addTempleBlog(String templeId, Blog blog) async {
     User? temple = _auth.currentUser;
-    String blogId = const Uuid().v1();
 
     if (temple == null) {
       throw Exception("User not authenticated");
     }
 
-    await _firestore
+    // Create a new document reference
+    DocumentReference docRef = _firestore
         .collection('temples')
         .doc(templeId)
         .collection('blogs')
-        .add(Blog(
-                blogId: blogId,
-                templeName: blog.templeName,
-                title: blog.title,
-                description: blog.description,
-                location: blog.location,
-                dateTime: blog.dateTime,
-                imageUrl: blog.imageUrl,
-                like: 0)
-            .toMap());
+        .doc();
+
+    // Create the blog with the Firestore document ID
+    Blog newBlog = Blog(
+        blogId: docRef.id, // Use Firestore document ID as blog ID
+        templeName: blog.templeName,
+        title: blog.title,
+        description: blog.description,
+        location: blog.location,
+        dateTime: blog.dateTime,
+        mediaUrls: blog.mediaUrls,
+        like: 0);
+
+    // Set the document data
+    await docRef.set(newBlog.toMap());
+
+    return docRef.id; // Return the document ID
   }
 
   Future<List<Service>> deleteTempleService(
@@ -97,24 +113,68 @@ class FirebaseService {
 
   Future<List<Service>> updateTempleService(
       String templeId, Service service, String? docId) async {
-    await _firestore
-        .collection('temples')
-        .doc(templeId)
-        .collection('services')
-        .doc(docId)
-        .update(service.toMap());
+    if (docId == null || docId.isEmpty) {
+      // If docId is null or empty, create a new document instead of updating
+      await addTempleService(templeId, service);
+    } else {
+      // Try to update, but if document doesn't exist, create it
+      try {
+        await _firestore
+            .collection('temples')
+            .doc(templeId)
+            .collection('services')
+            .doc(docId)
+            .update(service.toMap());
+      } catch (e) {
+        if (e.toString().contains('not found') ||
+            e.toString().contains('No document to update')) {
+          // Document doesn't exist, create it
+          await _firestore
+              .collection('temples')
+              .doc(templeId)
+              .collection('services')
+              .doc(docId)
+              .set(service.toMap());
+        } else {
+          // Other error, rethrow
+          rethrow;
+        }
+      }
+    }
 
     return [service];
   }
 
   Future<List<Blog>> updateTempleBlog(
       String templeId, Blog blog, String? docId) async {
-    await _firestore
-        .collection('temples')
-        .doc(templeId)
-        .collection('blogs')
-        .doc(docId)
-        .update(blog.toMap());
+    if (docId == null || docId.isEmpty) {
+      // If docId is null or empty, create a new document instead of updating
+      await addTempleBlog(templeId, blog);
+    } else {
+      // Try to update, but if document doesn't exist, create it
+      try {
+        await _firestore
+            .collection('temples')
+            .doc(templeId)
+            .collection('blogs')
+            .doc(docId)
+            .update(blog.toMap());
+      } catch (e) {
+        if (e.toString().contains('not found') ||
+            e.toString().contains('No document to update')) {
+          // Document doesn't exist, create it
+          await _firestore
+              .collection('temples')
+              .doc(templeId)
+              .collection('blogs')
+              .doc(docId)
+              .set(blog.toMap());
+        } else {
+          // Other error, rethrow
+          rethrow;
+        }
+      }
+    }
 
     return [blog];
   }
@@ -128,6 +188,30 @@ class FirebaseService {
         .snapshots()
         .map((snapshot) =>
             snapshot.docs.map((doc) => Blog.fromFirestore(doc)).toList());
+  }
+
+  // Get a single blog by ID - for refreshing a specific blog
+  Stream<Blog?> getSingleBlog(String templeId, String blogId) {
+    return FirebaseFirestore.instance
+        .collection('temples')
+        .doc(templeId)
+        .collection('blogs')
+        .doc(blogId)
+        .snapshots()
+        .map((snapshot) =>
+            snapshot.exists ? Blog.fromFirestore(snapshot) : null);
+  }
+
+  // Get a single service by ID - for refreshing a specific service
+  Stream<Service?> getSingleService(String templeId, String serviceId) {
+    return FirebaseFirestore.instance
+        .collection('temples')
+        .doc(templeId)
+        .collection('services')
+        .doc(serviceId)
+        .snapshots()
+        .map((snapshot) =>
+            snapshot.exists ? Service.fromFirestore(snapshot) : null);
   }
 
   Future<DocumentSnapshot<Map<String, dynamic>>> customerData(
@@ -207,9 +291,13 @@ class FirebaseService {
           id: templeId,
           name: temple.name,
           location: temple.location,
+          latitude: temple.latitude,
+          longitude: temple.longitude,
           description: temple.description,
           image: temple.image,
-          contact: "",
+          images: temple.images,
+          videos: temple.videos,
+          contact: temple.contact ?? "",
         ).toMap());
   }
 
@@ -230,13 +318,72 @@ class FirebaseService {
             .toMap());
   }
 
-  void updateBlogLike(String blogId, String templeId) {
-    _firestore
+  Future<void> updateBlogLike(String blogId, String templeId) async {
+    DocumentReference blogRef = _firestore
         .collection('temples')
         .doc(templeId)
         .collection('blogs')
-        .doc(blogId)
-        .update({'like': FieldValue.increment(1)});
+        .doc(blogId);
+
+    return _firestore.runTransaction((transaction) async {
+      DocumentSnapshot snapshot = await transaction.get(blogRef);
+      if (snapshot.exists) {
+        int currentLikes = snapshot.get('like') ?? 0;
+        transaction.update(blogRef, {'like': currentLikes + 1});
+      }
+    });
+  }
+
+  // Method to remove a like from a blog
+  Future<void> removeBlogLike(String blogId, String templeId) async {
+    DocumentReference blogRef = _firestore
+        .collection('temples')
+        .doc(templeId)
+        .collection('blogs')
+        .doc(blogId);
+
+    return _firestore.runTransaction((transaction) async {
+      DocumentSnapshot snapshot = await transaction.get(blogRef);
+      if (snapshot.exists) {
+        int currentLikes = snapshot.get('like') ?? 0;
+        // Ensure likes don't go below 0
+        transaction.update(blogRef, {'like': math.max(0, currentLikes - 1)});
+      }
+    });
+  }
+
+  Future<void> updateServiceLike(String serviceId, String templeId) async {
+    DocumentReference serviceRef = _firestore
+        .collection('temples')
+        .doc(templeId)
+        .collection('services')
+        .doc(serviceId);
+
+    return _firestore.runTransaction((transaction) async {
+      DocumentSnapshot snapshot = await transaction.get(serviceRef);
+      if (snapshot.exists) {
+        int currentLikes = snapshot.get('like') ?? 0;
+        transaction.update(serviceRef, {'like': currentLikes + 1});
+      }
+    });
+  }
+
+  // Method to remove a like from a service
+  Future<void> removeServiceLike(String serviceId, String templeId) async {
+    DocumentReference serviceRef = _firestore
+        .collection('temples')
+        .doc(templeId)
+        .collection('services')
+        .doc(serviceId);
+
+    return _firestore.runTransaction((transaction) async {
+      DocumentSnapshot snapshot = await transaction.get(serviceRef);
+      if (snapshot.exists) {
+        int currentLikes = snapshot.get('like') ?? 0;
+        // Ensure likes don't go below 0
+        transaction.update(serviceRef, {'like': math.max(0, currentLikes - 1)});
+      }
+    });
   }
 
   // Sign out
